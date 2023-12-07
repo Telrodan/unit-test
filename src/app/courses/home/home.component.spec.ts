@@ -17,29 +17,50 @@ import {click} from '../common/test-utils';
 
 
 describe('HomeComponent', () => {
-
   let fixture: ComponentFixture<HomeComponent>;
   let component:HomeComponent;
   let el: DebugElement;
+  let coursesService: any;
 
-  beforeEach((() => {
+  const beginnerCourses = setupCourses().filter(course => course.category === 'BEGINNER');
 
+  beforeEach((async () => {
+    const coursesServiceSpy = jasmine.createSpyObj('CoursesService', ['findAllCourses']);
+
+    TestBed.configureTestingModule({
+      imports: [
+        CoursesModule,
+        NoopAnimationsModule,
+      ],
+      providers: [
+        {
+          provide: CoursesService,
+          useValue: coursesServiceSpy
+        }
+      ],
+    }).compileComponents()
+      .then(() => {
+        fixture = TestBed.createComponent(HomeComponent);
+        component = fixture.componentInstance;
+        el = fixture.debugElement;
+        coursesService = TestBed.inject(CoursesService);
+      });
 
   }));
 
   it("should create the component", () => {
-
     expect(component).toBeTruthy();
-
   });
 
 
   it("should display only beginner courses", () => {
+    coursesService.findAllCourses.and.returnValue(of(beginnerCourses));
+    fixture.detectChanges();
 
-    pending();
+    const tabs = el.queryAll(By.css('.mdc-tab__text-label'));
 
+    expect(tabs.length).toBe(1, 'Unexpected number of tabs found');
   });
-
 
   it("should display only advanced courses", () => {
 
